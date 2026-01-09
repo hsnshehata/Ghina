@@ -7,31 +7,45 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
-  // Check if user is already logged in
+  // Check if user is already logged in (only once on mount)
   useEffect(() => {
+    setMounted(true);
     const loggedInUser = localStorage.getItem("loggedInUser");
     if (loggedInUser) {
       router.push("/");
     }
-  }, [router]);
+  }, []); // Empty dependency array - runs only once
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
     setIsLoading(true);
 
+    // Simulate slight delay for better UX
+    await new Promise(resolve => setTimeout(resolve, 500));
+
     // Check credentials
     if (username === "admin" && password === "662015") {
       // Store user in localStorage
       localStorage.setItem("loggedInUser", username);
-      router.push("/");
+      // Use router.replace to replace history entry
+      await router.replace("/");
     } else {
       setError("❌ اسم المستخدم أو كلمة المرور غير صحيحة");
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
+
+  // Don't render until mounted to avoid hydration issues
+  if (!mounted) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-900">
+        <div className="text-white text-lg">جاري التحميل...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white p-6">
